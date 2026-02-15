@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-pm-dark text-pm-text font-body;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-pm-darker;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-pm-border rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-pm-muted;
+  }
+}
+
+@layer components {
+  .pm-card {
+    @apply bg-pm-card border border-pm-border rounded-xl;
+  }
+
+  .pm-input {
+    @apply w-full bg-pm-surface border border-pm-border rounded-lg px-4 py-3 text-pm-text 
+           placeholder-pm-muted focus:outline-none focus:border-pm-red transition-colors text-sm;
+  }
+
+  .pm-btn-primary {
+    @apply bg-pm-red hover:bg-pm-red-dark text-white font-semibold px-5 py-2.5 rounded-lg 
+           transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed
+           disabled:active:scale-100;
+  }
+
+  .pm-btn-secondary {
+    @apply bg-transparent border border-pm-border hover:border-pm-red text-pm-muted hover:text-pm-text 
+           font-medium px-5 py-2.5 rounded-lg transition-all duration-200;
+  }
+
+  .pm-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold;
+  }
+
+  .status-active {
+    @apply bg-green-500/15 text-green-400 border border-green-500/20;
+  }
+
+  .status-draft {
+    @apply bg-pm-border/50 text-pm-muted border border-pm-border;
+  }
+
+  .status-closed {
+    @apply bg-red-900/20 text-red-400 border border-red-900/30;
+  }
+
+  .status-scheduled {
+    @apply bg-blue-900/20 text-blue-400 border border-blue-900/30;
+  }
+
+  .status-paused {
+    @apply bg-yellow-900/20 text-yellow-400 border border-yellow-900/30;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-pm-red to-pm-purple bg-clip-text text-transparent;
+  }
+
+  .bg-grid {
+    background-image: linear-gradient(rgba(233, 69, 96, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(233, 69, 96, 0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .glow-red {
+    box-shadow: 0 0 24px rgba(233, 69, 96, 0.2);
+  }
+}
