@@ -6,13 +6,15 @@ const ctrl = require('../controllers/poll.controller');
 
 const ownerMiddleware = requirePollOwnership(Poll);
 
-// Public routes
-router.get('/public', optionalAuth, ctrl.getPublicPolls);
-router.get('/:identifier', optionalAuth, ctrl.getPoll);
-router.get('/:identifier/access', optionalAuth, ctrl.validateAccess);
-
-// Host routes (auth required)
+// Exact routes MUST come before parameterised catch-alls
 router.get('/', protect, ctrl.getMyPolls);
+router.get('/public', optionalAuth, ctrl.getPublicPolls);
+
+// Parameterised routes
+router.get('/:identifier/access', optionalAuth, ctrl.validateAccess);
+router.get('/:identifier', optionalAuth, ctrl.getPoll);
+
+// Create
 router.post('/', protect, ctrl.createPoll);
 
 // Poll-specific host routes

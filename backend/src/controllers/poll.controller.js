@@ -171,9 +171,16 @@ const getPoll = async (req, res, next) => {
   try {
     const { identifier } = req.params;
 
-    const poll = await Poll.findOne({
-      $or: [{ slug: identifier }, { shortId: identifier.toUpperCase() }],
-    }).populate('host', 'username displayName');
+    // Support lookup by MongoDB _id, slug, or shortId
+    const orConditions = [
+      { slug: identifier },
+      { shortId: identifier.toUpperCase() },
+    ];
+    if (/^[a-f\d]{24}$/i.test(identifier)) {
+      orConditions.push({ _id: identifier });
+    }
+
+    const poll = await Poll.findOne({ $or: orConditions }).populate('host', 'username displayName');
 
     if (!poll) {
       return res.status(404).json({ success: false, message: 'Poll not found.' });

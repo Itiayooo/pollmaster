@@ -71,13 +71,14 @@ const adminOnly = (req, res, next) => {
 // ─── Require Poll Ownership ───────────────────────────────────────────────────
 const requirePollOwnership = (Poll) => async (req, res, next) => {
   try {
-    const poll = await Poll.findOne({
-      $or: [
-        { _id: req.params.pollId },
-        { slug: req.params.slug },
-        { shortId: req.params.shortId },
-      ],
-    });
+    const id = req.params.pollId || req.params.slug || req.params.shortId;
+    const orConditions = [];
+    if (id) {
+      orConditions.push({ slug: id });
+      orConditions.push({ shortId: id.toUpperCase() });
+      if (/^[a-f\d]{24}$/i.test(id)) orConditions.push({ _id: id });
+    }
+    const poll = await Poll.findOne({ $or: orConditions });
 
     if (!poll) {
       return res.status(404).json({ success: false, message: 'Poll not found.' });

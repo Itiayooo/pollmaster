@@ -115,9 +115,16 @@ const getPollResults = async (req, res, next) => {
     const { pollId } = req.params;
     const { token } = req.query;
 
-    const poll = await Poll.findOne({
-      $or: [{ _id: pollId }, { slug: pollId }, { shortId: pollId.toUpperCase() }],
-    });
+    // Safely build $or — only include _id if it looks like a valid ObjectId
+    const orConditions = [
+      { slug: pollId },
+      { shortId: pollId.toUpperCase() },
+    ];
+    if (/^[a-f\d]{24}$/i.test(pollId)) {
+      orConditions.push({ _id: pollId });
+    }
+
+    const poll = await Poll.findOne({ $or: orConditions });
 
     if (!poll) return res.status(404).json({ success: false, message: 'Poll not found.' });
 
@@ -153,9 +160,9 @@ const checkVoteStatus = async (req, res, next) => {
     const { pollSlug } = req.params;
     const { sessionId, token } = req.query;
 
-    const poll = await Poll.findOne({
-      $or: [{ slug: pollSlug }, { shortId: pollSlug.toUpperCase() }],
-    });
+    const orConds = [{ slug: pollSlug }, { shortId: pollSlug.toUpperCase() }];
+    if (/^[a-f\d]{24}$/i.test(pollSlug)) orConds.push({ _id: pollSlug });
+    const poll = await Poll.findOne({ $or: orConds });
 
     if (!poll) return res.status(404).json({ success: false, message: 'Poll not found.' });
 

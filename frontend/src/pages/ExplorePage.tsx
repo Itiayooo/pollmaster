@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { pollApi } from '../services/api';
-import { Poll, PollCategory } from '../types';
-import { Search, Zap, Globe, Clock, BarChart2, ArrowRight } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { Poll } from '../types';
+import { Search, Zap, Globe, Clock, BarChart2, ArrowRight, LayoutDashboard } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import PollStatusBadge from '../components/ui/PollStatusBadge';
 
@@ -26,6 +27,7 @@ const SORT_OPTIONS = [
 
 export default function ExplorePage() {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [sort, setSort] = useState('newest');
@@ -33,7 +35,13 @@ export default function ExplorePage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['public-polls', search, category, sort, page],
-    queryFn: () => pollApi.getPublicPolls({ search: search || undefined, category: category === 'all' ? undefined : category, sort, page }).then((r) => r.data),
+    queryFn: () =>
+      pollApi.getPublicPolls({
+        search: search || undefined,
+        category: category === 'all' ? undefined : category,
+        sort,
+        page,
+      }).then((r) => r.data),
   });
 
   const polls: Poll[] = data?.polls || [];
@@ -52,9 +60,31 @@ export default function ExplorePage() {
             </div>
             <span className="font-display text-xl tracking-wide">POLLMASTER</span>
           </button>
-          <div className="flex gap-2">
-            <button onClick={() => navigate('/login')} className="pm-btn-secondary text-sm py-2">Sign In</button>
-            <button onClick={() => navigate('/register')} className="pm-btn-primary text-sm py-2">Start Free</button>
+
+          <div className="flex items-center gap-2">
+            {isAuthenticated ? (
+              <>
+                <span className="text-pm-muted text-sm hidden sm:block">
+                  Hey, <span className="text-pm-text font-medium">{user?.displayName || user?.username}</span>
+                </span>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="pm-btn-primary text-sm py-2 flex items-center gap-2"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  Dashboard
+                </button>
+              </>
+            ) : (
+              <>
+                <button onClick={() => navigate('/login')} className="pm-btn-secondary text-sm py-2">
+                  Sign In
+                </button>
+                <button onClick={() => navigate('/register')} className="pm-btn-primary text-sm py-2">
+                  Start Free
+                </button>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -82,7 +112,9 @@ export default function ExplorePage() {
             onChange={(e) => setSort(e.target.value)}
             className="pm-input w-auto min-w-[140px]"
           >
-            {SORT_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+            {SORT_OPTIONS.map((s) => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
           </select>
         </div>
 
@@ -131,7 +163,9 @@ export default function ExplorePage() {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex gap-2 flex-wrap">
                     <PollStatusBadge status={poll.status} />
-                    <span className="pm-badge bg-pm-surface text-pm-muted capitalize text-xs">{poll.category}</span>
+                    <span className="pm-badge bg-pm-surface text-pm-muted capitalize text-xs">
+                      {poll.category}
+                    </span>
                   </div>
                   <ArrowRight className="w-4 h-4 text-pm-border group-hover:text-pm-red transition-colors shrink-0 mt-0.5" />
                 </div>
@@ -141,7 +175,9 @@ export default function ExplorePage() {
                 </h3>
 
                 {poll.description && (
-                  <p className="text-pm-muted text-xs leading-relaxed mb-3 line-clamp-2">{poll.description}</p>
+                  <p className="text-pm-muted text-xs leading-relaxed mb-3 line-clamp-2">
+                    {poll.description}
+                  </p>
                 )}
 
                 <div className="flex items-center justify-between text-xs text-pm-muted pt-3 border-t border-pm-border">
@@ -172,7 +208,9 @@ export default function ExplorePage() {
                 key={p}
                 onClick={() => setPage(p)}
                 className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
-                  page === p ? 'bg-pm-red text-white' : 'bg-pm-card border border-pm-border text-pm-muted hover:text-pm-text'
+                  page === p
+                    ? 'bg-pm-red text-white'
+                    : 'bg-pm-card border border-pm-border text-pm-muted hover:text-pm-text'
                 }`}
               >
                 {p}
