@@ -1,13 +1,12 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import {
-  LayoutDashboard, Plus, LogOut, BarChart2, Zap, ChevronRight, Globe
-} from 'lucide-react';
+import { LayoutDashboard, Plus, LogOut, Zap, ChevronRight, Globe, Hash } from 'lucide-react';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/dashboard/create', label: 'Create Poll', icon: Plus, end: false },
-  { to: '/explore', label: 'Explore', icon: Globe, end: false },
+  { to: '/dashboard/explore', label: 'Explore', icon: Globe, end: false },
+  { to: '/dashboard/join', label: 'Join a Poll', icon: Hash, end: false },
 ];
 
 export default function AppLayout() {
@@ -16,9 +15,7 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-screen flex bg-pm-darker">
-      {/* Sidebar */}
       <aside className="w-64 bg-pm-card border-r border-pm-border flex flex-col shrink-0">
-        {/* Logo */}
         <div className="p-6 border-b border-pm-border">
           <button onClick={() => navigate('/')} className="flex items-center gap-2">
             <div className="w-8 h-8 bg-pm-red rounded-lg flex items-center justify-center">
@@ -28,7 +25,6 @@ export default function AppLayout() {
           </button>
         </div>
 
-        {/* Nav */}
         <nav className="flex-1 p-4 space-y-1">
           {navItems.map((item) => (
             <NavLink
@@ -54,7 +50,6 @@ export default function AppLayout() {
           ))}
         </nav>
 
-        {/* User section */}
         <div className="p-4 border-t border-pm-border">
           <div className="flex items-center gap-3 px-3 py-2 mb-2">
             <div className="w-8 h-8 bg-gradient-to-br from-pm-red to-pm-purple rounded-full flex items-center justify-center text-white text-xs font-bold uppercase">
@@ -75,7 +70,6 @@ export default function AppLayout() {
         </div>
       </aside>
 
-      {/* Main content */}
       <main className="flex-1 overflow-auto">
         <div className="p-8 max-w-6xl mx-auto">
           <Outlet />

@@ -15,10 +15,11 @@ export default function VotePage() {
   const navigate = useNavigate();
 
   const token = searchParams.get('token') || undefined;
+  const codeFromUrl = searchParams.get('code') || '';
 
-  // Access code state
-  const [accessCode, setAccessCode] = useState('');
-  const [accessGranted, setAccessGranted] = useState(false);
+  // Access code state — pre-populate and auto-grant if code came from Join page
+  const [accessCode, setAccessCode] = useState(codeFromUrl.toUpperCase());
+  const [accessGranted, setAccessGranted] = useState(!!codeFromUrl);
   const [accessError, setAccessError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
 

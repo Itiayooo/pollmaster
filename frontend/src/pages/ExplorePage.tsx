@@ -2,13 +2,12 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { pollApi } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
 import { Poll } from '../types';
-import { Search, Zap, Globe, Clock, BarChart2, ArrowRight, LayoutDashboard } from 'lucide-react';
+import { Search, Globe, Clock, BarChart2, ArrowRight } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import PollStatusBadge from '../components/ui/PollStatusBadge';
 
-const CATEGORIES: { value: string; label: string }[] = [
+const CATEGORIES = [
   { value: 'all', label: 'All' },
   { value: 'governance', label: 'Governance' },
   { value: 'community', label: 'Community' },
@@ -27,7 +26,6 @@ const SORT_OPTIONS = [
 
 export default function ExplorePage() {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [sort, setSort] = useState('newest');
@@ -48,177 +46,135 @@ export default function ExplorePage() {
   const pagination = data?.pagination;
 
   return (
-    <div className="min-h-screen bg-pm-darker">
-      <div className="absolute inset-0 bg-grid opacity-20" />
+    <div className="animate-fade-in">
+      <div className="mb-8">
+        <h1 className="font-display text-4xl text-pm-text mb-2">EXPLORE POLLS</h1>
+        <p className="text-pm-muted text-sm">Discover and participate in public polls</p>
+      </div>
 
-      {/* Nav */}
-      <nav className="relative border-b border-pm-border bg-pm-darker/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-          <button onClick={() => navigate('/')} className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-pm-red rounded flex items-center justify-center">
-              <Zap className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-display text-xl tracking-wide">POLLMASTER</span>
-          </button>
-
-          <div className="flex items-center gap-2">
-            {isAuthenticated ? (
-              <>
-                <span className="text-pm-muted text-sm hidden sm:block">
-                  Hey, <span className="text-pm-text font-medium">{user?.displayName || user?.username}</span>
-                </span>
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  className="pm-btn-primary text-sm py-2 flex items-center gap-2"
-                >
-                  <LayoutDashboard className="w-4 h-4" />
-                  Dashboard
-                </button>
-              </>
-            ) : (
-              <>
-                <button onClick={() => navigate('/login')} className="pm-btn-secondary text-sm py-2">
-                  Sign In
-                </button>
-                <button onClick={() => navigate('/register')} className="pm-btn-primary text-sm py-2">
-                  Start Free
-                </button>
-              </>
-            )}
-          </div>
+      {/* Filters */}
+      <div className="flex flex-wrap gap-4 mb-6">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pm-muted" />
+          <input
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            className="pm-input pl-10"
+            placeholder="Search polls..."
+          />
         </div>
-      </nav>
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
+          className="pm-input w-auto min-w-[140px]"
+        >
+          {SORT_OPTIONS.map((s) => (
+            <option key={s.value} value={s.value}>{s.label}</option>
+          ))}
+        </select>
+      </div>
 
-      <div className="relative max-w-6xl mx-auto px-6 py-10">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="font-display text-5xl text-pm-text mb-2">EXPLORE POLLS</h1>
-          <p className="text-pm-muted">Discover and participate in public polls from around the world</p>
-        </div>
-
-        {/* Filters */}
-        <div className="flex flex-wrap gap-4 mb-8">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pm-muted" />
-            <input
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="pm-input pl-10"
-              placeholder="Search polls..."
-            />
-          </div>
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className="pm-input w-auto min-w-[140px]"
+      {/* Category pills */}
+      <div className="flex gap-2 flex-wrap mb-8">
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat.value}
+            onClick={() => { setCategory(cat.value); setPage(1); }}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+              category === cat.value
+                ? 'bg-pm-red text-white'
+                : 'bg-pm-card border border-pm-border text-pm-muted hover:border-pm-red/40 hover:text-pm-text'
+            }`}
           >
-            {SORT_OPTIONS.map((s) => (
-              <option key={s.value} value={s.value}>{s.label}</option>
-            ))}
-          </select>
-        </div>
+            {cat.label}
+          </button>
+        ))}
+      </div>
 
-        {/* Category pills */}
-        <div className="flex gap-2 flex-wrap mb-8">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.value}
-              onClick={() => { setCategory(cat.value); setPage(1); }}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-                category === cat.value
-                  ? 'bg-pm-red text-white'
-                  : 'bg-pm-card border border-pm-border text-pm-muted hover:border-pm-red/40 hover:text-pm-text'
-              }`}
-            >
-              {cat.label}
-            </button>
+      {/* Poll grid */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="pm-card p-6 animate-pulse">
+              <div className="h-4 bg-pm-border rounded mb-3 w-3/4" />
+              <div className="h-3 bg-pm-border rounded mb-2 w-full" />
+              <div className="h-3 bg-pm-border rounded w-1/2" />
+            </div>
           ))}
         </div>
-
-        {/* Poll grid */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="pm-card p-6 animate-pulse">
-                <div className="h-4 bg-pm-border rounded mb-3 w-3/4" />
-                <div className="h-3 bg-pm-border rounded mb-2 w-full" />
-                <div className="h-3 bg-pm-border rounded w-1/2" />
-              </div>
-            ))}
-          </div>
-        ) : polls.length === 0 ? (
-          <div className="text-center py-20">
-            <Globe className="w-12 h-12 text-pm-border mx-auto mb-4" />
-            <h3 className="font-semibold text-pm-text mb-2">No polls found</h3>
-            <p className="text-pm-muted text-sm">Try adjusting your search or filters</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {polls.map((poll) => (
-              <div
-                key={poll._id}
-                className="pm-card p-5 hover:border-pm-red/30 transition-all cursor-pointer group"
-                onClick={() => navigate(`/vote/${poll.slug}`)}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex gap-2 flex-wrap">
-                    <PollStatusBadge status={poll.status} />
+      ) : polls.length === 0 ? (
+        <div className="text-center py-20">
+          <Globe className="w-12 h-12 text-pm-border mx-auto mb-4" />
+          <h3 className="font-semibold text-pm-text mb-2">No polls found</h3>
+          <p className="text-pm-muted text-sm">Try adjusting your search or filters</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {polls.map((poll) => (
+            <div
+              key={poll._id}
+              className="pm-card p-5 hover:border-pm-red/30 transition-all cursor-pointer group"
+              onClick={() => navigate(`/vote/${poll.slug}`)}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex gap-2 flex-wrap">
+                  <PollStatusBadge status={poll.status} />
+                  {poll.category && (
                     <span className="pm-badge bg-pm-surface text-pm-muted capitalize text-xs">
                       {poll.category}
                     </span>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-pm-border group-hover:text-pm-red transition-colors shrink-0 mt-0.5" />
-                </div>
-
-                <h3 className="font-semibold text-pm-text mb-2 leading-snug group-hover:text-pm-red transition-colors line-clamp-2">
-                  {poll.title}
-                </h3>
-
-                {poll.description && (
-                  <p className="text-pm-muted text-xs leading-relaxed mb-3 line-clamp-2">
-                    {poll.description}
-                  </p>
-                )}
-
-                <div className="flex items-center justify-between text-xs text-pm-muted pt-3 border-t border-pm-border">
-                  <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1">
-                      <BarChart2 className="w-3 h-3" />
-                      {poll.stats.totalVotes} vote{poll.stats.totalVotes !== 1 ? 's' : ''}
-                    </span>
-                    <span>{poll.questions.length} question{poll.questions.length !== 1 ? 's' : ''}</span>
-                  </div>
-                  {poll.endsAt && (
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {formatDistanceToNow(new Date(poll.endsAt), { addSuffix: true })}
-                    </span>
                   )}
                 </div>
+                <ArrowRight className="w-4 h-4 text-pm-border group-hover:text-pm-red transition-colors shrink-0 mt-0.5" />
               </div>
-            ))}
-          </div>
-        )}
 
-        {/* Pagination */}
-        {pagination && pagination.pages > 1 && (
-          <div className="flex justify-center gap-2 mt-10">
-            {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPage(p)}
-                className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
-                  page === p
-                    ? 'bg-pm-red text-white'
-                    : 'bg-pm-card border border-pm-border text-pm-muted hover:text-pm-text'
-                }`}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+              <h3 className="font-semibold text-pm-text mb-2 leading-snug group-hover:text-pm-red transition-colors line-clamp-2">
+                {poll.title}
+              </h3>
+
+              {poll.description && (
+                <p className="text-pm-muted text-xs leading-relaxed mb-3 line-clamp-2">
+                  {poll.description}
+                </p>
+              )}
+
+              <div className="flex items-center justify-between text-xs text-pm-muted pt-3 border-t border-pm-border">
+                <div className="flex items-center gap-3">
+                  <span className="flex items-center gap-1">
+                    <BarChart2 className="w-3 h-3" />
+                    {poll.stats.totalVotes} vote{poll.stats.totalVotes !== 1 ? 's' : ''}
+                  </span>
+                  <span>{poll.questions.length} Q</span>
+                </div>
+                {poll.endsAt && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {formatDistanceToNow(new Date(poll.endsAt), { addSuffix: true })}
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {pagination && pagination.pages > 1 && (
+        <div className="flex justify-center gap-2 mt-10">
+          {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPage(p)}
+              className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
+                p === page
+                  ? 'bg-pm-red text-white'
+                  : 'bg-pm-card border border-pm-border text-pm-muted hover:text-pm-text'
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

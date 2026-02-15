@@ -13,6 +13,7 @@ import VotePage from './pages/VotePage';
 import ResultsPage from './pages/ResultsPage';
 import ExplorePage from './pages/ExplorePage';
 import NotFoundPage from './pages/NotFoundPage';
+import JoinPollPage from './pages/JoinPollPage';
 
 // Layout
 import AppLayout from './components/layout/AppLayout';
@@ -52,6 +53,8 @@ function App() {
         <Route path="create" element={<CreatePollPage />} />
         <Route path="poll/:pollId/edit" element={<EditPollPage />} />
         <Route path="poll/:pollId/manage" element={<PollManagePage />} />
+        <Route path="explore" element={<ExplorePage />} />
+        <Route path="join" element={<JoinPollPage />} />
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />

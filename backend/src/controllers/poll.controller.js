@@ -312,6 +312,17 @@ const updatePoll = async (req, res, next) => {
       if (req.body[field] !== undefined) updates[field] = req.body[field];
     });
 
+    // Allow question edits only on non-active polls
+    if (req.body.questions !== undefined) {
+      if (poll.status === 'active' || poll.status === 'paused') {
+        return res.status(400).json({
+          success: false,
+          message: 'Questions cannot be edited while a poll is active.',
+        });
+      }
+      updates.questions = req.body.questions;
+    }
+
     // Handle status transitions
     if (req.body.status) {
       const validTransitions = {
